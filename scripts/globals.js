@@ -1,12 +1,14 @@
 var curves = [{
     points: [],
-    color: 'black'
+    color: '#CCC'
 }];
 var isDragging = false;
+var isEditingPoint = false;
 var currentPoint = {
     x: 0, y: 0
 };
 var currentCurve = 0;
+var numIterations = 100;
 
 function updateCurrentPoint(event) {
     currentPoint = {
@@ -17,16 +19,18 @@ function updateCurrentPoint(event) {
 }
 
 function updateCurrentCurve(point) {
-    if (curves[currentCurve].points.length === 2) {
-        curves[currentCurve].points[1] = point;
-    } else {
-        curves[currentCurve].points.push(point);
-    }
+    if (isEditingPoint) {
+        return curves[currentCurve].points[1] = point;
+    } 
+
+    console.log(point);
+    
+    curves[currentCurve].points.push(point);
 }
 
-function addNewCurve(pointA, pointB) {
+function addNewCurve(pointA) {
     curves.push({
-        points: [pointA, pointB],
+        points: [pointA],
         color: 'black'
     });
     currentCurve = curves.length - 1;

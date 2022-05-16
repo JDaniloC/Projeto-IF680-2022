@@ -34,7 +34,7 @@ class Canvas {
     drawPoint(point) {
         const radius = 3;
         this.canvasCtx.beginPath();
-        this.canvasCtx.fillStyle = "black";
+        this.canvasCtx.fillStyle = "#CCC";
         this.canvasCtx.arc(point.x, point.y, radius , 0, 2 * Math.PI);
         this.canvasCtx.fill();
     }
@@ -48,8 +48,22 @@ class Canvas {
         this.canvasCtx.stroke();
     }
 
-    redraw() {
-        this.clear();
+    interpolate(pointA, pointB, t){
+        return {
+            x: ((1-t) * pointA.x + t * pointB.x),
+            y: ((1-t) * pointA.y + t * pointB.y)
+        }
+    }
+
+    drawLines(points, color) {
+        for (let index = 1; index < points.length; index++) {
+            const point = points[index];
+            this.drawPoint(point);
+            this.drawLine(points[index - 1], point, color);   
+        }
+    }
+
+    drawCurves(curves) {
         curves.forEach(curve => {
             if (curve.points.length === 0) {
                 return;
@@ -58,8 +72,42 @@ class Canvas {
             if (curve.points.length === 1) {
                 return;
             }
-            this.drawPoint(curve.points[1]);
-            this.drawLine(curve.points[0], curve.points[1], curve.color);
+            this.drawLines(curve.points, curve.color);
+        });
+    }
+
+    deCasteljau(points, t) {
+        const grade = points.length - 1;
+        if (grade === 1) {
+            return this.interpolate(points[0], points[1], t);
+        } 
+        const newPoints = [];
+        for (let i = 0; i < grade; i++) {
+            newPoints.push(this.interpolate(points[i], points[i+1], t));
+        }
+        return this.deCasteljau(newPoints, t);
+    }
+
+    drawBezierCurve(curve) {
+        const points = curve.points;
+        if (points.length <= 2) {
+            return;
+        }
+
+        let bezierCurves = [];
+        bezierCurves.push(points[0]);
+        for (let i = 1; i <= numIterations - 2; i++) {
+            bezierCurves.push(this.deCasteljau(points, i / numIterations));
+        }
+        bezierCurves.push(points[points.length - 1]);
+        this.drawLines(bezierCurves, "#000");
+    }
+
+    redraw() {
+        this.clear();
+        this.drawCurves(curves);
+        curves.forEach(curve => {
+            this.drawBezierCurve(curve);
         });
     }
 }
