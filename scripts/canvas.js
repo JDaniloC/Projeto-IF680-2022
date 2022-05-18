@@ -30,7 +30,6 @@ class Canvas {
         
         this.canvas.addEventListener("mouseup", (event) => {
             isDragging = false;
-            // currentPointIndex = -1;
         });
     }
 
@@ -41,8 +40,12 @@ class Canvas {
 
     drawPoint(point, color = "#CCC") {
         this.canvasCtx.beginPath();
+        let radius = pointRadius;
+        if (isCurrentPointIndex(point)) {
+            radius *= 2;
+        }
         this.canvasCtx.fillStyle = color;
-        this.canvasCtx.arc(point.x, point.y, pointRadius , 0, 2 * Math.PI);
+        this.canvasCtx.arc(point.x, point.y, radius , 0, 2 * Math.PI);
         this.canvasCtx.fill();
     }
     
@@ -87,7 +90,7 @@ class Canvas {
         return this.deCasteljau(newPoints, t);
     }
 
-    drawBezierCurve(curve) {
+    drawBezierCurve(curve, isCurrentCurve = false) {
         const points = curve.points;
         if (points.length <= 2) {
             return;
@@ -99,7 +102,7 @@ class Canvas {
             bezierCurves.push(this.deCasteljau(points, i / numIterations));
         }
         bezierCurves.push(points[points.length - 1]);
-        this.drawLines(bezierCurves, "#000");
+        this.drawLines(bezierCurves, isCurrentCurve ? "#ff6600" : "#000");
     }
 
     
@@ -121,9 +124,10 @@ class Canvas {
     redraw() {
         this.clear();
         if (curvasInput.checked) {
-            curves.forEach(curve => {
-                this.drawBezierCurve(curve);
-            });
+            for (let index = 0; index < curves.length; index++) {
+                const curve = curves[index];
+                this.drawBezierCurve(curve, index === currentCurve);
+            }
         }
         this.drawControlPoligonals(curves);
     }

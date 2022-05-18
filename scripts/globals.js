@@ -32,6 +32,15 @@ function intersectPoint(pointA, pointB) {
     return Math.sqrt(difference) <= pointRadius;
 }
 
+function isCurrentPointIndex(point) {
+    if (currentPointIndex === -1) return false;
+    const currentPoint = curves[currentCurve].points[currentPointIndex];
+    if (intersectPoint(point, currentPoint)) {
+        return true;
+    }
+    return false;
+}
+
 function verifyIntersection(point) {
     const currentPoints = curves[currentCurve].points;
     for (let index = 0; index < currentPoints.length; index++) {
@@ -46,7 +55,8 @@ function verifyIntersection(point) {
 function updateCurrentPoint(event) {
     currentPoint = {
         x: event.offsetX,
-        y: event.offsetY
+        y: event.offsetY,
+        color: '#CCC'
     };
     return currentPoint;
 }
@@ -62,10 +72,6 @@ function addPointToCurve() {
     curves[currentCurve].points.push(currentPoint);
 }
 
-function switchCurrentCurve() {
-    currentCurve = (currentCurve + 1) % curves.length;
-}
-
 function addNewCurve() {
     curves.push({
         points: [],
@@ -76,6 +82,11 @@ function addNewCurve() {
 
 function redraw() {
     canvas.redraw();
+}
+
+function switchCurrentCurve() {
+    currentCurve = (currentCurve + 1) % curves.length;
+    redraw()
 }
 
 function deleteCurve() {

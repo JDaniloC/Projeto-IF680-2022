@@ -5,6 +5,55 @@ body {
     overflow: hidden;
     align-items: center;
 }
+header#navbar {
+    width: 95%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+}
+header#navbar button,
+header#navbar label.mdl-switch {
+    margin-bottom: 10px !important;
+}
 #canvas {
-    border: solid;
+    height: 100%;
+}
+label.mdl-switch {
+    width: fit-content;
+    margin: 0 1em;
+}
+#tutorial-button {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    z-index: 80;
+}
+#infos {
+    position: absolute;
+    z-index: 99;
+    bottom: 10px;
+    right: 10px;
+
+    width: 40em;
+    background-color: #FFF;
+    border: solid #CCC 0.1px;
+    border-radius: 4px;
+    padding: 0.5em 1em;
+}
+#infos header {
+    display: flex;
+    padding: 0 1em;
+    justify-content: space-between;
+}
+#infos button {
+    background-color: transparent;
+    cursor: pointer;
+    border: none;
+}
+#infos button img {
+    width: 20px;
+}
+.hide {
+    display: none;
 }
