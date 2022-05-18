@@ -5,6 +5,7 @@ var curves = [{
 var currentPoint = {
     x: 0, y: 0
 };
+var replayCurves = [];
 
 var pointRadius = 3;
 var isDragging = false;
@@ -14,15 +15,19 @@ var numIterations = 5;
 var currentPointIndex = -1;
 
 var iterationsInput = null;
+var replayContainer = null;
 var linhasInput = null;
 var pontosInput = null;
 var curvasInput = null;
+var replayInput = null;
 
 function loadDomReferences() {
     iterationsInput = document.querySelector("#avaliacoes");
     linhasInput = document.querySelector("input[name='linhas']");
     pontosInput = document.querySelector("input[name='pontos']");
     curvasInput = document.querySelector("input[name='curvas']");
+    replayContainer = document.querySelector("#replayContainer");
+    replayInput = document.querySelector(".slider");
 }
 
 function intersectPoint(pointA, pointB) {
@@ -55,8 +60,7 @@ function verifyIntersection(point) {
 function updateCurrentPoint(event) {
     currentPoint = {
         x: event.offsetX,
-        y: event.offsetY,
-        color: '#CCC'
+        y: event.offsetY
     };
     return currentPoint;
 }

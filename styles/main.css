@@ -16,8 +16,24 @@ header#navbar button,
 header#navbar label.mdl-switch {
     margin-bottom: 10px !important;
 }
-#canvas {
+#canvas, #replay {
     height: 100%;
+}
+#replayContainer {
+    display: none;
+    z-index: 100;
+    position: absolute;
+    background: rgba(0, 0, 0, 85%);
+}
+#replayContainer button {
+    position: absolute;
+    right: 25px;
+    top: 25px;
+    background-color: transparent;
+    cursor: pointer;
+    border: none;
+    width: 40px;
+    filter: invert(1);
 }
 label.mdl-switch {
     width: fit-content;

@@ -58,13 +58,6 @@ class Canvas {
         this.canvasCtx.stroke();
     }
 
-    interpolate(pointA, pointB, t){
-        return {
-            x: ((1-t) * pointA.x + t * pointB.x),
-            y: ((1-t) * pointA.y + t * pointB.y)
-        }
-    }
-
     drawLines(points, color, isControl = false) {
         for (let index = 1; index < points.length; index++) {
             const point = points[index];
@@ -78,16 +71,82 @@ class Canvas {
         }
     }
 
-    deCasteljau(points, t) {
+    interpolate(pointA, pointB, t) {
+        return {
+            x: ((1-t) * pointA.x + t * pointB.x),
+            y: ((1-t) * pointA.y + t * pointB.y)
+        }
+    }
+
+    playReplay(maxIndex = replayCurves.length) {
+        this.clear();
+        let pointColor = "#CCC";
+        if (maxIndex == replayCurves.length) {
+            const bezierCurves = replayCurves[maxIndex - 1].bezierCurves;
+            this.drawControlPoligonals([replayCurves[0].curve]);
+            return this.drawLines(bezierCurves, "#3f51b5");
+        }
+        for (let index = 0; index < maxIndex; index++) {
+            const info = replayCurves[index];
+            switch(info.type) {
+                case "control":
+                    this.drawControlPoligonals([info.curve]);
+                    break
+                case "interpolate":
+                    pointColor = "#CCC";
+                    if (index === maxIndex - 1) {
+                        this.drawPoint(info.A, "orange");
+                        this.drawPoint(info.B, "orange");
+                        pointColor = "red";
+                    }
+                    this.drawPoint(info.point, pointColor);
+                    break
+                case "line":
+                    if (index === maxIndex - 1) {
+                        this.drawLine(info.A, info.B, "red");
+                    }
+                    break
+                case "point":
+                    pointColor = "orange";
+                    if (index === maxIndex - 1) {
+                        pointColor = "red";
+                    }
+                    this.drawPoint(info.point, pointColor);
+            }
+        }
+    }
+
+    deCasteljau(points, t, canReplay = false) {
         const grade = points.length - 1;
         if (grade === 1) {
+            if (canReplay) replayCurves.push({
+                A: points[0],
+                B: points[1], 
+                type: "line" 
+            });
             return this.interpolate(points[0], points[1], t);
         } 
         const newPoints = [];
         for (let i = 0; i < grade; i++) {
-            newPoints.push(this.interpolate(points[i], points[i+1], t));
+            const pointA = points[i];
+            const pointB = points[i + 1];
+            const newPoint = this.interpolate(pointA, pointB, t)
+            if (canReplay) {
+                replayCurves.push({
+                    A: pointA,
+                    B: pointB, 
+                    type: "line" 
+                });
+                replayCurves.push({
+                    A: pointA, 
+                    B: pointB, 
+                    point: newPoint, 
+                    type: "interpolate" 
+                });
+            }
+            newPoints.push(newPoint);
         }
-        return this.deCasteljau(newPoints, t);
+        return this.deCasteljau(newPoints, t, canReplay);
     }
 
     drawBezierCurve(curve, isCurrentCurve = false) {
@@ -97,11 +156,29 @@ class Canvas {
         }
 
         let bezierCurves = [];
+        if (isCurrentCurve) {
+            replayCurves = [{
+                type: "control", curve
+            }];
+        }
         bezierCurves.push(points[0]);
         for (let i = 1; i <= numIterations - 2; i++) {
-            bezierCurves.push(this.deCasteljau(points, i / numIterations));
+            const position = i / numIterations;
+            const newPoint = this.deCasteljau(points, position, isCurrentCurve);
+            if (isCurrentCurve) replayCurves.push({ 
+                point: newPoint, 
+                type: "point", 
+                position 
+            });
+            bezierCurves.push(newPoint);
         }
         bezierCurves.push(points[points.length - 1]);
+        if (isCurrentCurve) {
+            replayCurves.push({
+                type: "bezier", bezierCurves
+            });
+            replayInput.max = replayCurves.length;
+        }
         this.drawLines(bezierCurves, isCurrentCurve ? "#ff6600" : "#000");
     }
 
@@ -134,3 +211,4 @@ class Canvas {
 }
 
 const canvas = new Canvas('canvas');
+const replay = new Canvas('replay');
