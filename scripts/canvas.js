@@ -6,23 +6,31 @@ class Canvas {
         this.canvas.height = window.innerHeight;
 
         this.canvas.addEventListener("mousedown", (event) => {
-            updateCurrentPoint(event);
             isDragging = true;
+            currentPointIndex = -1;
+            
+            const newPoint = updateCurrentPoint(event);
+            const index = verifyIntersection(newPoint);
+            if (index > -1) {
+                currentPointIndex = index;
+            } else {
+                addPointToCurve();
+            }
+            this.redraw();
         });
         
         this.canvas.addEventListener("mousemove", (event) => {
             if (!isDragging) {
                 return;
             }
-            updateCurrentPoint(event);
+            currentPoint = updateCurrentPoint(event);
+            editCurvePoint(currentPoint, currentPointIndex);
             this.redraw();
-            this.drawPoint(currentPoint);
         });
         
         this.canvas.addEventListener("mouseup", (event) => {
             isDragging = false;
-            updateCurrentCurve(currentPoint);
-            this.redraw();
+            // currentPointIndex = -1;
         });
     }
 
@@ -31,11 +39,10 @@ class Canvas {
         this.canvasCtx.clearRect(0, 0, width, height);
     }
 
-    drawPoint(point) {
-        const radius = 3;
+    drawPoint(point, color = "#CCC") {
         this.canvasCtx.beginPath();
-        this.canvasCtx.fillStyle = "#CCC";
-        this.canvasCtx.arc(point.x, point.y, radius , 0, 2 * Math.PI);
+        this.canvasCtx.fillStyle = color;
+        this.canvasCtx.arc(point.x, point.y, pointRadius , 0, 2 * Math.PI);
         this.canvasCtx.fill();
     }
     
@@ -55,25 +62,17 @@ class Canvas {
         }
     }
 
-    drawLines(points, color) {
+    drawLines(points, color, isControl = false) {
         for (let index = 1; index < points.length; index++) {
             const point = points[index];
-            this.drawPoint(point);
-            this.drawLine(points[index - 1], point, color);   
+            if (pontosInput.checked) {
+                const pointColor = isControl ?  "#CCC" : "red";
+                this.drawPoint(point, pointColor);
+            }
+            if ((linhasInput.checked && isControl) || !isControl) {
+                this.drawLine(points[index - 1], point, color);   
+            }
         }
-    }
-
-    drawCurves(curves) {
-        curves.forEach(curve => {
-            if (curve.points.length === 0) {
-                return;
-            }
-            this.drawPoint(curve.points[0]);
-            if (curve.points.length === 1) {
-                return;
-            }
-            this.drawLines(curve.points, curve.color);
-        });
     }
 
     deCasteljau(points, t) {
@@ -103,12 +102,30 @@ class Canvas {
         this.drawLines(bezierCurves, "#000");
     }
 
+    
+    drawControlPoligonals(curves) {
+        curves.forEach(curve => {
+            if (curve.points.length === 0) {
+                return;
+            }
+            if (pontosInput.checked) {
+                this.drawPoint(curve.points[0]);
+            }
+            if (curve.points.length === 1) {
+                return;
+            }
+            this.drawLines(curve.points, curve.color, true);
+        });
+    }
+
     redraw() {
         this.clear();
-        this.drawCurves(curves);
-        curves.forEach(curve => {
-            this.drawBezierCurve(curve);
-        });
+        if (curvasInput.checked) {
+            curves.forEach(curve => {
+                this.drawBezierCurve(curve);
+            });
+        }
+        this.drawControlPoligonals(curves);
     }
 }
 

@@ -10,7 +10,30 @@
     <script type="text/javascript" src="scripts/globals.js"></script>
   </head>
 
-  <body>
+  <body onload="loadDomReferences()">
+    <header>
+      <button onclick="addNewCurve()"> 
+        Criar nova curva 
+      </button>
+      <button onclick="deleteCurve()"> 
+        Deletar curva 
+      </button>
+      <button onclick="switchCurrentCurve()"> 
+        Alternar entre curvas 
+      </button>
+      <button onclick="deletePoint()"> 
+        Deletar ponto
+      </button>
+      <input type="number" placeholder="Avaliações" id="avaliacoes"
+        value="5" onchange="updateNumIterations(this)">
+      <input type="checkbox" name="linhas" 
+        id="linhas" onchange="redraw()" checked>
+      <input type="checkbox" name="pontos" id="pontos"
+        onchange="redraw()" checked>
+      <input type="checkbox" name="curvas" id="curvas" 
+        onchange="redraw()" checked>
+    </header>
+
     <canvas id = "canvas" >
     </canvas>
   </body>

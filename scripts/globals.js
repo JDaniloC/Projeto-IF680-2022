@@ -2,13 +2,46 @@ var curves = [{
     points: [],
     color: '#CCC'
 }];
-var isDragging = false;
-var isEditingPoint = false;
 var currentPoint = {
     x: 0, y: 0
 };
+
+var pointRadius = 3;
+var isDragging = false;
+
 var currentCurve = 0;
-var numIterations = 100;
+var numIterations = 5;
+var currentPointIndex = -1;
+
+var iterationsInput = null;
+var linhasInput = null;
+var pontosInput = null;
+var curvasInput = null;
+
+function loadDomReferences() {
+    iterationsInput = document.querySelector("#avaliacoes");
+    linhasInput = document.querySelector("input[name='linhas']");
+    pontosInput = document.querySelector("input[name='pontos']");
+    curvasInput = document.querySelector("input[name='curvas']");
+}
+
+function intersectPoint(pointA, pointB) {
+    const XPoint = pointA.x - pointB.x;
+    const YPoint = pointA.y - pointB.y;
+    const difference = Math.pow(XPoint, 2) + Math.pow(YPoint, 2);
+    return Math.sqrt(difference) <= pointRadius;
+}
+
+function verifyIntersection(point) {
+    const currentPoints = curves[currentCurve].points;
+    for (let index = 0; index < currentPoints.length; index++) {
+        const element = currentPoints[index];
+        if (intersectPoint(point, element)) {
+            return index;
+        }
+    }
+    return -1;
+}
 
 function updateCurrentPoint(event) {
     currentPoint = {
@@ -18,20 +51,53 @@ function updateCurrentPoint(event) {
     return currentPoint;
 }
 
-function updateCurrentCurve(point) {
-    if (isEditingPoint) {
-        return curves[currentCurve].points[1] = point;
-    } 
-
-    console.log(point);
-    
-    curves[currentCurve].points.push(point);
+function editCurvePoint(point, index = -1) {
+    if (index === -1) {
+        index = curves[currentCurve].points.length - 1;
+    }
+    curves[currentCurve].points[index] = point;
 }
 
-function addNewCurve(pointA) {
+function addPointToCurve() {
+    curves[currentCurve].points.push(currentPoint);
+}
+
+function switchCurrentCurve() {
+    currentCurve = (currentCurve + 1) % curves.length;
+}
+
+function addNewCurve() {
     curves.push({
-        points: [pointA],
-        color: 'black'
+        points: [],
+        color: '#CCC'
     });
     currentCurve = curves.length - 1;
+}
+
+function redraw() {
+    canvas.redraw();
+}
+
+function deleteCurve() {
+    curves.splice(currentCurve, 1);
+    if (curves.length === 0) {
+        addNewCurve();
+    }
+    currentCurve = (currentCurve + 1) % curves.length;
+    redraw();
+}
+
+function deletePoint() {
+    if (currentPointIndex === -1) {
+        curves[currentCurve].points.pop();
+    } else {
+        curves[currentCurve].points.splice(currentPointIndex, 1);
+    }
+    redraw();
+}
+
+function updateNumIterations(event) {
+    numIterations = event.value;
+    iterationsInput.value = numIterations;
+    redraw();
 }

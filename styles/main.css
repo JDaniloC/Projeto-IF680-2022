@@ -1,5 +1,10 @@
+body {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+    align-items: center;
+}
 #canvas {
     border: solid;
-    width: 100%;
-    height: 100%;
 }
