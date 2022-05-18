@@ -107,6 +107,7 @@ function deletePoint() {
         curves[currentCurve].points.pop();
     } else {
         curves[currentCurve].points.splice(currentPointIndex, 1);
+        currentPointIndex -= 1;
     }
     redraw();
 }
